@@ -1,0 +1,68 @@
+﻿@model IEnumerable<DataPoint>
+
+@{
+    ViewData["Title"] = "Run Chart";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    <canvas id="myChart" width="600" height="400"></canvas>
+
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.Select(item => item.X))),
+                datasets: [{
+                    label: 'Run Chart',
+                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.Y))),
+                    borderColor: 'blue',
+                    backgroundColor: 'transparent',
+                    pointRadius: 8,
+                    pointStyle: 'circle'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                title: {
+                    display: true,
+                    text: 'Run Chart'
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        },
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.parsed.y;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+</div>
