@@ -1,7 +1,9 @@
 ﻿@model IEnumerable<DataPoint>
-
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Run Chart";
+    var dataRefreshIntervalMinutes = Configuration["RunChartSettings:DataRefreshIntervalMinutes"];
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -10,6 +12,18 @@
     <canvas id="myChart" width="600" height="400"></canvas>
 
     <script>
+        var dataRefreshIntervalMinutes = @Json.Serialize(dataRefreshIntervalMinutes);
+
+        function fetchData() {
+            $.get('/RunChart/RefreshData', function (data) {
+                console.log('Data received:', data);
+                var chart = myChart;
+                chart.data.labels = data.map(item => item.X);
+                chart.data.datasets[0].data = data.map(item => item.Y);
+                chart.update();
+            });
+        }
+
         var ctx = document.getElementById('myChart').getContext('2d');
         var myChart = new Chart(ctx, {
             type: 'line',
@@ -21,7 +35,8 @@
                     borderColor: 'blue',
                     backgroundColor: 'transparent',
                     pointRadius: 8,
-                    pointStyle: 'circle'
+                    pointStyle: 'circle',
+                    borderWidth: 2
                 }]
             },
             options: {
@@ -63,6 +78,10 @@
                 }
             }
         });
+
+        // Periodically fetch new data based on the configured time interval
+        setInterval(fetchData, dataRefreshIntervalMinutes*60*1000);
     </script>
+
 
 </div>
