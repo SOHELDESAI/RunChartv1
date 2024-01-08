@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Chart.Mvc" Version="1.0.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.25" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 
 </Project>
