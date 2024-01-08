@@ -1,0 +1,86 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model IEnumerable<int>
+
+@{
+    ViewData["Title"] = "Histogram";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    <canvas id="histogramChart" width="600" height="400"></canvas>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        var histogramData = @Html.Raw(Json.Serialize(ViewBag.HistogramData));
+
+        var ctx = document.getElementById('histogramChart').getContext('2d');
+        var histogramChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: histogramData.map((_, index) => index + 1),
+                datasets: [{
+                    label: 'Histogram',
+                    data: histogramData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Bins'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Frequency'
+                        },
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                annotation: {
+                    annotations: [{
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'y',
+                        value: higherLineValue,
+                        borderColor: 'red',
+                        borderWidth: 2,
+                        label: {
+                            content: 'Higher Line',
+                            enabled: true
+                        }
+                    },
+                    {
+                        type: 'line',
+                        mode: 'horizontal',
+                        scaleID: 'y',
+                        value: lowerLineValue,
+                        borderColor: 'blue',
+                        borderWidth: 2,
+                        label: {
+                            content: 'Lower Line',
+                            enabled: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+</div>

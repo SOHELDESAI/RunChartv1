@@ -21,7 +21,7 @@ public class RunChartController : Controller
         // Generate sample data (x-values: 1 to 10, y-values: random)
         var random = new Random();
         var dataPoints = Enumerable.Range(1, 10)
-            .Select(x => new DataPoint { X = x, Y = random.Next(1, 100) })
+            .Select(x => new DataPoint { X = x, Y = random.Next(1, 100) , Max=100,USL = 80,UCL=60,Mean=50,LCL=30,LSL=10,Min=0})
             .ToList();
 
         return View(dataPoints);

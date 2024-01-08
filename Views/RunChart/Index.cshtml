@@ -4,83 +4,215 @@
 @{
     ViewData["Title"] = "Run Chart";
     var dataRefreshIntervalMinutes = Configuration["RunChartSettings:DataRefreshIntervalMinutes"];
+    var higherLineValue = 80; // Set your higher line value
+    var lowerLineValue = 20;  // Set your lower line value
 }
 
 <h2>@ViewData["Title"]</h2>
 
 <div>
-    <canvas id="myChart" width="600" height="400"></canvas>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <canvas id="myChart" width="600" height="400" ></canvas>
 
     <script>
-        var dataRefreshIntervalMinutes = @Json.Serialize(dataRefreshIntervalMinutes);
+        //var dataRefreshIntervalMinutes = @dataRefreshIntervalMinutes;
+        var higherLineValue = @Json.Serialize(higherLineValue);
+        var lowerLineValue = @Json.Serialize(lowerLineValue);
+        var myChart;
+        //function fetchData()
+        //{
+        //    $.get('/RunChart/RefreshData', function (data) {
+        //        console.log('Data received:', data);
+        //        showChart();
+        //        var chart = myChart;
+        //        chart.data.labels = data.map(item => item.X);
+        //        chart.data.datasets[0].data = data.map(item => item.Y);
+        //        chart.update();
+        //    });
+        //    //showChart();
+
+        //}
 
         function fetchData() {
             $.get('/RunChart/RefreshData', function (data) {
                 console.log('Data received:', data);
-                var chart = myChart;
-                chart.data.labels = data.map(item => item.X);
-                chart.data.datasets[0].data = data.map(item => item.Y);
-                chart.update();
+                if (myChart) {
+                    myChart.destroy(); // Destroy the existing chart if it exists
+                }
+                showChart(data);
             });
         }
 
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: @Html.Raw(Json.Serialize(Model.Select(item => item.X))),
-                datasets: [{
-                    label: 'Run Chart',
-                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.Y))),
-                    borderColor: 'blue',
-                    backgroundColor: 'transparent',
-                    pointRadius: 8,
-                    pointStyle: 'circle',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                title: {
-                    display: true,
-                    text: 'Run Chart'
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Time'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Value'
+        function showChart(data) {
+
+            var ctx = document.getElementById('myChart').getContext('2d');
+
+            var chartHigherLineValue = @Json.Serialize(higherLineValue);
+            var chartLowerLineValue = @Json.Serialize(lowerLineValue);
+
+            myChart = new Chart
+                (
+                    ctx,
+                    {
+                        type: 'line',
+                        
+                        data:
+                        {
+                            labels: @Html.Raw(Json.Serialize(Model.Select(item => item.X))),
+                            datasets:
+                                [{
+                                    label: 'Run Chart',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.Y))),
+                                    borderColor: 'blue',
+                                    backgroundColor: 'transperent',
+                                    pointRadius: 8,
+                                    pointStyle: 'circle',
+                                    borderWidth: 2
+                                },
+
+                                {
+                                    label: 'Max ',
+                                    borderColor: 'red',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.Max))),
+                                    type: 'line',
+                                    fill: '+1',
+                                    borderDash: [5, 5],
+                                    backgroundColor: 'red',
+                                },
+                                {
+                                    label: 'USL ',
+                                    borderColor: 'red',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.USL))),
+                                    type: 'line',
+                                    fill: '+1',
+                                    borderDash: [5, 5],
+                                    backgroundColor: '#00FF00',
+                                },
+                                {
+                                    label: 'UCL ',
+                                    borderColor: 'green',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.UCL))),
+                                    type: 'line',
+                                    fill: '+1',
+                                    backgroundColor: '#094D1C',
+                                    borderDash: [5, 5]
+                                },
+                                {
+                                    label: 'Mean ',
+                                    borderColor: 'blue',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.Mean))),
+                                    type: 'line',
+                                    fill: '+1',
+                                    backgroundColor: '#094D1C',
+                                    borderDash: [5, 5]
+                                },
+        
+                                {
+                                    label: 'LCL ',
+                                    borderColor: 'brown',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.LCL))),
+                                    type: 'line',
+                                    fill: '+1',
+                                    backgroundColor: '#00FF00',
+                                    borderDash: [5, 5]
+                                },
+                                        {
+                                    label: 'LSL ',
+                                    borderColor: 'yellow',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.LSL))),
+                                    type: 'line',
+                                    fill: '+1',
+                                    backgroundColor: 'red',
+                                    borderDash: [5, 5]
+                                },
+                                {
+                                    label: 'Min ',
+                                    borderColor: 'yellow',
+                                    data: @Html.Raw(Json.Serialize(Model.Select(item => item.Min))),
+                                    type: 'line',
+                                    fill: '+1',
+                                    borderDash: [5, 5],
+                                    backgroundColor: 'red',
+                                },
+                                ]
                         },
-                        beginAtZero: true,
-                        min: 0,
-                        max: 100
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return context.parsed.y;
+                        options:
+                        {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            title:
+                            {
+                                display: true,
+                                text: 'Run Chart'
+                            },
+                            scales:
+                            {
+                                x:
+                                {
+                                    title:
+                                    {
+                                        display: true,
+                                        text: 'Time'
+                                    }
+                                },
+                                y:
+                                {
+                                    title:
+                                    {
+                                        display: true,
+                                        text: 'Value'
+                                    },
+                                    beginAtZero: true,
+                                    min: 0,
+                                    max: 100
+                                }
+                            },
+                            plugins:
+                            {
+                                legend:
+                                {
+                                    display: false,
+                                    position: 'bottom'
+                                },
+                                tooltip:
+                                {
+                                    callbacks:
+                                    {
+                                        label: function (context) {
+                                            return context.parsed.y;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
+                );
+            //myChart.options.data.datasets[1].value = chartHigherLineValue;
+            //myChart.options.data.datasets[2].value = chartLowerLineValue;
+
+            //myChart.update();
+        }
+
+        //$(window).load(function () {
+        //    showChart();
+        //    // Periodically fetch new data based on the configured time interval
+        //    setInterval(function () { fetchData(); }, 60 * 1000);
+        //}
+        //);
+
+        $(document).ready(function () {
+            showChart();
+            // Periodically fetch new data based on the configured time interval
+            setInterval(function () { fetchData(); },  60 * 1000);
         });
 
-        // Periodically fetch new data based on the configured time interval
-        setInterval(fetchData, dataRefreshIntervalMinutes*60*1000);
+                        //$(document).ready(function () {
+                        //    // Periodically fetch new data based on the configured time interval
+                        //    setInterval(function () { fetchData(); },  60 * 1000);
+                        //});
+
+
+
     </script>
 
 
