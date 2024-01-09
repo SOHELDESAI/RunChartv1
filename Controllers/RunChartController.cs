@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using RunChartv1.Models;
 using System;
 using System.Collections.Generic;
@@ -20,8 +21,27 @@ public class RunChartController : Controller
         var dataRefreshIntervalMinutes = _configuration.GetValue<int>("RunChartSettings:DataRefreshIntervalMinutes");
         var connectionstrings = _configuration.GetValue<string>("connectionstrings:defaultconnection");
 
-        string query = "SELECT *,100 as Max,80 as USL ,60 as UCL,50 as Mean,30 as LCL,10 as LSL,0 as Min FROM runchartdata";
+        //  string query = "SELECT *,100 as Max,80 as USL ,60 as UCL,50 as Mean,30 as LCL,10 as LSL,0 as Min FROM runchartdata";
 
+
+        // Get the entire query string
+        string queryString = HttpContext.Request.QueryString.Value;
+
+        // Parse the query string into a dictionary
+        //var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(queryString);
+
+        var queryParams = QueryHelpers.ParseQuery(queryString);
+
+        // Access specific parameters
+        
+
+        if (queryParams.ContainsKey("Name"))
+        {
+            
+            string nameParam = queryParams["Name"].ToString();
+
+            
+        }
 
         try
         {
@@ -30,8 +50,12 @@ public class RunChartController : Controller
             {
                 connection.Open();
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlCommand command = new SqlCommand("GetRunchartData", connection))
                 {
+
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.Parameters.Clear();
+                    command.Parameters.AddWithValue("reccount",10);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -49,9 +73,7 @@ public class RunChartController : Controller
                                 LSL = Convert.ToDouble(reader["LSL"]),
                                 Min = Convert.ToDouble(reader["Min"]),
                             });
-                            // Process each row
-                            //Console.WriteLine($"{reader["ColumnName1"]}, {reader["ColumnName2"]}");
-                            // Add more columns as needed
+                            
                         }
                         return View(points);
                     }
@@ -74,13 +96,24 @@ public class RunChartController : Controller
     }
 
     [HttpGet]
+    //public IActionResult RefreshData()
+    //{
+    //    // Generate new data for the refresh
+    //    var newData = Enumerable.Range(1, 10)
+    //        .Select(x => new DataPoint { X = x, Y = _random.Next(1, 100) })
+    //        .ToList();
+
+    //    return Json(newData);
+    //}
+
     public IActionResult RefreshData()
     {
         // Generate new data for the refresh
         var newData = Enumerable.Range(1, 10)
-            .Select(x => new DataPoint { X = x, Y = _random.Next(1, 100) })
+            .Select(x => new DataPoint { X = x, Y = _random.NextDouble() * (90.5 - 1.5) + 1.5 })
             .ToList();
 
         return Json(newData);
     }
+
 }

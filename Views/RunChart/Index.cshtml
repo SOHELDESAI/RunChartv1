@@ -4,20 +4,21 @@
 @{
     ViewData["Title"] = "Run Chart";
     var dataRefreshIntervalMinutes = Configuration["RunChartSettings:DataRefreshIntervalMinutes"];
-    var higherLineValue = 80; // Set your higher line value
-    var lowerLineValue = 20;  // Set your lower line value
+  
 }
 
 <h2>@ViewData["Title"]</h2>
 
 <div>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
     <canvas id="myChart" width="600" height="400" ></canvas>
 
     <script>
         //var dataRefreshIntervalMinutes = @dataRefreshIntervalMinutes;
-        var higherLineValue = @Json.Serialize(higherLineValue);
-        var lowerLineValue = @Json.Serialize(lowerLineValue);
+     
         var myChart;
         //function fetchData()
         //{
@@ -46,9 +47,7 @@
         function showChart(data) {
 
             var ctx = document.getElementById('myChart').getContext('2d');
-
-            var chartHigherLineValue = @Json.Serialize(higherLineValue);
-            var chartLowerLineValue = @Json.Serialize(lowerLineValue);
+         
 
             myChart = new Chart
                 (
@@ -152,7 +151,7 @@
                                     title:
                                     {
                                         display: true,
-                                        text: 'Time'
+                                        text: 'Nos ->'
                                     }
                                 },
                                 y:
@@ -160,11 +159,11 @@
                                     title:
                                     {
                                         display: true,
-                                        text: 'Value'
+                                        text: 'X in mm ->'
                                     },
                                     beginAtZero: true,
-                                    min: 0,
-                                    max: 100
+                                    min: @Html.Raw(Json.Serialize(Model.Select(item => item.Min).First())),
+                                    max: @Html.Raw(Json.Serialize(Model.Select(item => item.Max).First()))
                                 }
                             },
                             plugins:
@@ -187,18 +186,8 @@
                         }
                     }
                 );
-            //myChart.options.data.datasets[1].value = chartHigherLineValue;
-            //myChart.options.data.datasets[2].value = chartLowerLineValue;
-
-            //myChart.update();
+            
         }
-
-        //$(window).load(function () {
-        //    showChart();
-        //    // Periodically fetch new data based on the configured time interval
-        //    setInterval(function () { fetchData(); }, 60 * 1000);
-        //}
-        //);
 
         $(document).ready(function () {
             showChart();
@@ -206,14 +195,7 @@
             setInterval(function () { fetchData(); },  60 * 1000);
         });
 
-                        //$(document).ready(function () {
-                        //    // Periodically fetch new data based on the configured time interval
-                        //    setInterval(function () { fetchData(); },  60 * 1000);
-                        //});
-
-
-
+                        
     </script>
-
 
 </div>
