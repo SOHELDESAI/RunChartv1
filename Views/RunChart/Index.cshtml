@@ -20,19 +20,7 @@
         //var dataRefreshIntervalMinutes = @dataRefreshIntervalMinutes;
      
         var myChart;
-        //function fetchData()
-        //{
-        //    $.get('/RunChart/RefreshData', function (data) {
-        //        console.log('Data received:', data);
-        //        showChart();
-        //        var chart = myChart;
-        //        chart.data.labels = data.map(item => item.X);
-        //        chart.data.datasets[0].data = data.map(item => item.Y);
-        //        chart.update();
-        //    });
-        //    //showChart();
-
-        //}
+        
 
         function fetchData() {
             $.get('/RunChart/RefreshData', function (data) {
